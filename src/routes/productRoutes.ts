@@ -1,4 +1,6 @@
 import express from "express";
+import { createProduct } from "../controllers/productController";
+
 
 const router = express.Router();
 router.get("/products", (req, res) => {
@@ -17,14 +19,7 @@ router.get("/products", (req, res) => {
     ]
   });
 });
-router.post("/products", (req, res) => {
-  const product = req.body;
-
-  res.json({
-    message: "Product created successfully",
-    product: product
-  });
-});
+router.post("/products", createProduct);
 router.put("/products/:id", (req, res) => {
   const id = req.params.id;
   const product = req.body;
