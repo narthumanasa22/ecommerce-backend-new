@@ -1,2 +1,14 @@
+# Node.js dependencies
 node_modules/
+
+# Environment variables / secrets
 .env
+
+# Prisma generated client
+src/generated/
+
+# AI tool files
+.agents/
+.claude/
+.cursor/
+.devin/
