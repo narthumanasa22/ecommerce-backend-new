@@ -7,23 +7,22 @@ import {
   deleteProduct
 } from "../controllers/productController";
 
+import { authenticate } from "../middleware/authMiddleware";
+import { authorizeAdmin } from "../middleware/authorizeAdmin";
+
 const router = express.Router();
 
-
-// GET ALL PRODUCTS
 router.get("/products", getProducts);
 
-
-// CREATE PRODUCT
 router.post("/products", createProduct);
 
-
-// UPDATE PRODUCT
 router.put("/products/:id", updateProduct);
 
-
-// DELETE PRODUCT
-router.delete("/products/:id", deleteProduct);
-
+router.delete(
+  "/products/:id",
+  authenticate,
+  authorizeAdmin,
+  deleteProduct
+);
 
 export default router;

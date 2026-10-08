@@ -1,73 +1,26 @@
 import express from "express";
-
 import productRoutes from "./routes/productRoutes";
-import { pool } from "./database";
-import { prisma } from "./prisma";
-
+import authRoutes from "./routes/authRoutes";
 
 const app = express();
 
-
-// JSON BODY PARSER
+// JSON request body ni read cheyyadaniki
 app.use(express.json());
 
-
-// PRODUCT ROUTES
+// Product APIs
 app.use(productRoutes);
 
+// Authentication APIs
+app.use("/api/auth", authRoutes);
 
-// HOME ROUTE
+// Home route
 app.get("/", (req, res) => {
   res.json({
     message: "E-Commerce Backend is running 🚀"
   });
 });
 
-
-// START SERVER
-app.listen(3000, async () => {
-
+// Start server
+app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
-
-
-  // PostgreSQL connection using pg
-  try {
-
-    await pool.query("SELECT NOW()");
-
-    console.log("PostgreSQL connected successfully ✅");
-
-  } catch (error) {
-
-    console.error(
-      "PostgreSQL connection failed ❌",
-      error
-    );
-
-  }
-
-
-  // Prisma connection test
-  try {
-
-    const products = await prisma.product.findMany();
-
-    console.log(
-      "Prisma connected successfully ✅"
-    );
-
-    console.log(
-      "Products from Prisma:",
-      products
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Prisma connection failed ❌",
-      error
-    );
-
-  }
-
 });
