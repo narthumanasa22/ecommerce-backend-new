@@ -5,7 +5,6 @@ import {
   deleteProduct
 } from "../repositories/productRepository";
 
-
 // CREATE PRODUCT
 export const createProductService = async (product: any) => {
 
@@ -22,7 +21,7 @@ export const createProductService = async (product: any) => {
     throw new Error("Product price must be greater than 0");
   }
 
-  // Database work goes to Repository
+  // Repository call
   const createdProduct = await createProduct(
     product.name,
     product.price
@@ -35,7 +34,6 @@ export const createProductService = async (product: any) => {
 // GET ALL PRODUCTS
 export const getProductsService = async () => {
 
-  // Repository handles Prisma/database
   const products = await findAllProducts();
 
   return products;
@@ -67,7 +65,7 @@ export const updateProductService = async (
     throw new Error("Invalid product ID");
   }
 
-  // Repository handles database update
+  // Repository call
   const updatedProduct = await updateProduct(
     productId,
     product.name,
@@ -87,7 +85,7 @@ export const deleteProductService = async (id: string) => {
     throw new Error("Invalid product ID");
   }
 
-  // Repository handles database delete
+  // Repository call
   const deletedProduct = await deleteProduct(productId);
 
   return deletedProduct;
