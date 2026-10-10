@@ -1,11 +1,21 @@
+
 import express from "express";
+
 import productRoutes from "./routes/productRoutes";
 import authRoutes from "./routes/authRoutes";
+import cartRoutes from "./routes/cartRoutes";
 
 const app = express();
 
-// JSON request body ni read cheyyadaniki
+// Middleware to read JSON request bodies
 app.use(express.json());
+
+// Home route
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "E-Commerce Backend is running 🚀"
+  });
+});
 
 // Product APIs
 app.use(productRoutes);
@@ -13,14 +23,12 @@ app.use(productRoutes);
 // Authentication APIs
 app.use("/api/auth", authRoutes);
 
-// Home route
-app.get("/", (req, res) => {
-  res.json({
-    message: "E-Commerce Backend is running 🚀"
-  });
-});
+// Cart APIs
+app.use("/cart", cartRoutes);
 
 // Start server
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+const PORT = 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
