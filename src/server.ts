@@ -4,27 +4,31 @@ import express from "express";
 import productRoutes from "./routes/productRoutes";
 import authRoutes from "./routes/authRoutes";
 import cartRoutes from "./routes/cartRoutes";
+import orderRoutes from "./routes/orderRoutes";
 
 const app = express();
 
-// Middleware to read JSON request bodies
+// Middleware: Read JSON request bodies
 app.use(express.json());
 
 // Home route
 app.get("/", (req, res) => {
   res.status(200).json({
-    message: "E-Commerce Backend is running 🚀"
+    message: "E-Commerce Backend is running 🚀",
   });
 });
 
-// Product APIs
+// Product routes
 app.use(productRoutes);
 
-// Authentication APIs
+// Authentication routes
 app.use("/api/auth", authRoutes);
 
-// Cart APIs
+// Cart routes
 app.use("/cart", cartRoutes);
+
+// Order routes
+app.use("/orders", orderRoutes);
 
 // Start server
 const PORT = 3000;
