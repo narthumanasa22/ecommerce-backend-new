@@ -1,38 +1,32 @@
-
 import express from "express";
-
 import productRoutes from "./routes/productRoutes";
-import authRoutes from "./routes/authRoutes";
-import cartRoutes from "./routes/cartRoutes";
-import orderRoutes from "./routes/orderRoutes";
+import redisClient from "./redis";
 
 const app = express();
 
-// Middleware: Read JSON request bodies
 app.use(express.json());
 
-// Home route
-app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "E-Commerce Backend is running 🚀",
-  });
-});
+// Products API routes
+app.use("/products", productRoutes);
 
-// Product routes
-app.use(productRoutes);
+const PORT = Number(process.env.PORT) || 3000;
 
-// Authentication routes
-app.use("/api/auth", authRoutes);
+async function startServer() {
+  try {
+    // Connect to Redis before accepting requests
+    if (!redisClient.isOpen) {
+      await redisClient.connect();
+    }
 
-// Cart routes
-app.use("/cart", cartRoutes);
+    console.log("Redis connected successfully");
 
-// Order routes
-app.use("/orders", orderRoutes);
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+}
 
-// Start server
-const PORT = 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+startServer();

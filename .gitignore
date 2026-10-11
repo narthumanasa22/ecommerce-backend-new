@@ -1,8 +1,17 @@
-# Node.js dependencies
+
+# Dependencies
 node_modules/
 
-# Environment variables / secrets
+# Build output
+dist/
+
+# Environment variables and secrets
 .env
+.env.*
+!.env.example
+
+# Git
+.git/
 
 # Prisma generated client
 src/generated/
