@@ -1,3 +1,4 @@
+
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
@@ -9,53 +10,82 @@ export interface AuthRequest extends Request {
   };
 }
 
+interface JwtUserPayload {
+  id: number;
+  email: string;
+  role: string;
+}
+
 export const authenticate = (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // 1. Get Authorization header
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
-        message: "Authentication required"
+        message: "Authentication required",
       });
     }
 
-    // 2. Get token
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.slice(7);
+    const secret = process.env.JWT_SECRET;
 
-    if (!token) {
-      return res.status(401).json({
-        message: "Token missing"
+    if (!secret) {
+      console.error("JWT_SECRET is missing");
+      return res.status(500).json({
+        message: "Server configuration error",
       });
     }
 
-    // 3. Verify JWT
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string
-    ) as {
-      id: number;
-      email: string;
-      role: string;
-    };
+    const decoded = jwt.verify(token, secret);
 
-    // 4. Store user information
+    if (
+      typeof decoded === "string" ||
+      typeof decoded.id !== "number" ||
+      typeof decoded.email !== "string" ||
+      typeof decoded.role !== "string"
+    ) {
+      return res.status(401).json({
+        message: "Invalid token payload",
+      });
+    }
+
+    const user = decoded as JwtUserPayload;
+
     req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role
+      id: user.id,
+      email: user.email,
+      role: user.role,
     };
 
-    // 5. Continue
     next();
-
-  } catch (error) {
+  } catch {
     return res.status(401).json({
-      message: "Invalid or expired token"
+      message: "Invalid or expired token",
     });
   }
+};
+
+// ADMIN-only authorization
+export const requireAdmin = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required",
+    });
+  }
+
+  if (req.user.role !== "ADMIN") {
+    return res.status(403).json({
+      message: "Admin access required",
+    });
+  }
+
+  next();
 };
