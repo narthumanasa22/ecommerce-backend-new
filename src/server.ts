@@ -1,44 +1,53 @@
 
-import "dotenv/config";
 import express from "express";
+import dotenv from "dotenv";
 
-import productRoutes from "./routes/productRoutes";
 import authRoutes from "./routes/authRoutes";
-import { connectRedis } from "./redis";
-import { connectRabbitMQ } from "./rabbitmq";
+import cartRoutes from "./routes/cartRoutes";
+import orderRoutes from "./routes/orderRoutes";
+
+dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
 
-// Middleware
+// 1. Middleware: parse incoming JSON
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use("/products", productRoutes);
-app.use("/auth", authRoutes);
+// 2. Debugging middleware
+app.use((req, res, next) => {
+  console.log("Request:", req.method, req.url);
+  console.log("Content-Type:", req.headers["content-type"]);
+  console.log("Request body:", req.body);
+  next();
+});
 
-// Health check
-app.get("/", (_req, res) => {
+// 3. Home route
+app.get("/", (req, res) => {
   res.status(200).json({
-    message: "E-Commerce Backend is running",
+    message: "E-Commerce Backend is running 🚀",
   });
 });
 
-// Start server
-async function start() {
-  try {
-    await connectRedis();
-    await connectRabbitMQ();
+// 4. Authentication routes
+app.use("/auth", authRoutes);
 
-    app.listen(PORT, () => {
-      console.log("Redis connected successfully");
-      console.log("RabbitMQ connected successfully");
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
-}
+// 5. Cart routes
+app.use("/cart", cartRoutes);
 
-start();
+// 6. Order routes
+app.use("/orders", orderRoutes);
+
+// 7. Handle unknown routes
+app.use((req, res) => {
+  res.status(404).json({
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
+  });
+});
+
+// 8. Start server
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

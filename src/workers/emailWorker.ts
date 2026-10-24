@@ -5,14 +5,13 @@ import { Worker } from "bullmq";
 const emailWorker = new Worker(
   "emailQueue",
   async (job) => {
-    console.log("Processing email job:", job.id);
-
     const { email, message } = job.data;
 
+    console.log("Processing job:", job.id);
     console.log("Sending email to:", email);
     console.log("Message:", message);
 
-    // Demo only: actual email pampadam ledu
+    // Demo only: actual email send cheyyatledu
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     console.log("Email job processed successfully!");
@@ -31,6 +30,10 @@ emailWorker.on("completed", (job) => {
 
 emailWorker.on("failed", (job, error) => {
   console.error("Job failed:", job?.id, error.message);
+});
+
+emailWorker.on("error", (error) => {
+  console.error("Worker error:", error.message);
 });
 
 console.log("Email worker waiting for jobs...");
