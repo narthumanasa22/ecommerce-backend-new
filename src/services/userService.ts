@@ -1,19 +1,21 @@
+
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
 import * as userRepo from "../repositories/userRepository";
 
-// =========================
+// ===================================
 // REGISTER USER
-// =========================
+// ===================================
 export const registerUser = async (
   name: string,
   email: string,
   password: string
 ) => {
-  // 1. Check existing email
-  const existing = await userRepo.findByEmail(email);
+  // 1. Check whether email already exists
+  const existingUser = await userRepo.findByEmail(email);
 
-  if (existing) {
+  if (existingUser) {
     throw new Error("Email already registered");
   }
 
@@ -33,15 +35,13 @@ export const registerUser = async (
   return safeUser;
 };
 
-
-// =========================
+// ===================================
 // LOGIN USER
-// =========================
+// ===================================
 export const loginUser = async (
   email: string,
   password: string
 ) => {
-
   // 1. Find user by email
   const user = await userRepo.findByEmail(email);
 
@@ -59,23 +59,30 @@ export const loginUser = async (
     throw new Error("Invalid email or password");
   }
 
-  // 3. Create JWT token
+  // 3. Check JWT secret
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!jwtSecret) {
+    throw new Error("JWT_SECRET is not configured");
+  }
+
+  // 4. Generate JWT token
   const token = jwt.sign(
     {
       id: user.id,
       email: user.email,
       role: user.role
     },
-    process.env.JWT_SECRET as string,
+    jwtSecret,
     {
       expiresIn: "1h"
     }
   );
 
-  // 4. Remove password
+  // 5. Remove password
   const { password: _, ...safeUser } = user;
 
-  // 5. Return user + token
+  // 6. Return user and token
   return {
     user: safeUser,
     token
